@@ -2,6 +2,7 @@
 import { Part } from ".prisma/client";
 import { useLoaderData } from "@remix-run/react";
 import { useEffect, useState } from "react";
+import Dropdown from "./dropdown";
 
 export default function SelectPart() {
   const allParts = useLoaderData().sort((a: Part, b: Part) => a.name.localeCompare(b.name));
@@ -23,7 +24,6 @@ export default function SelectPart() {
     selectedSubcategory && setAvailableParts(allParts.filter((part: Part) => part.category === selectedCategory && part.subcategory === selectedSubcategory));
   }, [selectedCategory, selectedSubcategory]);
 
-
   function onCategoryChange(value: string) {
     setSelectedCategory(value);
     setSelectedSubcategory("");
@@ -35,41 +35,18 @@ export default function SelectPart() {
     setSelectedPart(undefined);
   }
 
+  function onPartNameSelection(value: string) {
+    setSelectedPart(availableParts.find(part => part.name === value));
+  }
+
   return (
     <div className="p-[8rem]">
       <label className="text-white text-3xl">Find a part</label>
-      <div id="category-select">
-        <select onChange={(event) => onCategoryChange(event.target.value)}>
-          <option className="hidden" value="default">Select a category</option>
-          {categories && categories.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div id="subcategory-select">
-        <select onChange={(event) => onSubcategoryChange(event.target.value)} disabled={!selectedCategory}>
-          <option className="hidden" value="default">Select a subcategory</option>
-          {subcategories && subcategories.map((subcategory) => (
-            <option key={subcategory} value={subcategory}>
-              {subcategory}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div id="partname-select">
-        <select disabled={!selectedSubcategory}>
-          <option className="hidden" value="default">Select a part name</option>
-          {availableParts && availableParts.map((part: Part) => (
-            <option key={part.id} value={part.id}>
-              {part.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <Dropdown optionName="category" onSelect={onCategoryChange} options={categories} />
+      <Dropdown optionName="subcategory" onSelect={onSubcategoryChange} options={subcategories} disabled={!selectedCategory} />
+      <Dropdown optionName="part name" onSelect={onPartNameSelection} options={availableParts.map(part => part.name)} disabled={!selectedSubcategory} />
       {selectedPart && (
-        <div>selectedPart.name</div>
+        <div>{selectedPart.name}</div>
       )}
     </div >
   )
